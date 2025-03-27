@@ -108,7 +108,6 @@ class FollowViewSet(
         4)  Для получения списка подписок используется обратная связь.
         `follower` от модели `User`.
     """
-    queryset = Follow.objects.all()
     serializer_class = FollowSerializer
     filter_backends = (filters.SearchFilter, )
     search_fields = ('=following__username',)
