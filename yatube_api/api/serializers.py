@@ -8,18 +8,6 @@ from posts.models import Comment, Follow, Group, Post
 User = get_user_model()
 
 
-class UserSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели User.
-
-    Предоставляет информацию о:
-    - ID пользователя;
-    - Имени пользователя.
-    """
-    class Meta:
-        model = User
-        fields = ('id', 'username')
-
-
 class PostSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Post.
 
