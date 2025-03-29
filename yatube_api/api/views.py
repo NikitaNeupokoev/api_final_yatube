@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, permissions, viewsets
+
+from rest_framework import filters, mixins, permissions, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 
 from .permissions import IsAuthorOrReadOnly
@@ -9,7 +10,7 @@ from .serializers import (
     GroupSerializer,
     PostSerializer
 )
-from posts.models import Follow, Group, Post
+from posts.models import Group, Post
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -53,10 +54,14 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthorOrReadOnly,)
 
-    def get_queryset(self):
+    def _get_post(self):
         return get_object_or_404(
-            Post, pk=self.kwargs.get('post_id')
-        ).comments.all()
+            Post,
+            id=self.kwargs.get('post_id')
+        )
+
+    def get_queryset(self):
+        return self._get_post().comments.all()
 
     def perform_create(self, serializer):
         serializer.save(
@@ -83,7 +88,11 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.AllowAny]
 
 
-class FollowViewSet(viewsets.ModelViewSet):
+class FollowViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
     """
     ViewSet для модели Follow (подписки).
 
@@ -99,11 +108,10 @@ class FollowViewSet(viewsets.ModelViewSet):
         4)  Для получения списка подписок используется обратная связь.
         `follower` от модели `User`.
     """
-    queryset = Follow.objects.all()
+
     serializer_class = FollowSerializer
     filter_backends = (filters.SearchFilter, )
-    search_fields = ('following__username',)
-    http_method_names = ['get', 'post']
+    search_fields = ('=following__username',)
 
     def get_queryset(self):
         return self.request.user.follower.all()
