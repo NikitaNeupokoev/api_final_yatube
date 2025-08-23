@@ -4,6 +4,7 @@ from .models import Comment, Follow, Group, Post
 
 
 class PostAdmin(admin.ModelAdmin):
+    """Админ-панель для управления постами."""
     list_display = ('pk', 'text', 'pub_date', 'author')
     search_fields = ('text',)
     list_filter = ('pub_date',)

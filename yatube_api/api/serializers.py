@@ -19,6 +19,7 @@ class PostSerializer(serializers.ModelSerializer):
     - Группе (опционально);
     - Дате публикации.
     """
+
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username'
@@ -26,7 +27,14 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'text', 'author', 'image', 'group', 'pub_date')
+        fields = (
+            'id',
+            'text',
+            'author',
+            'image',
+            'group',
+            'pub_date'
+        )
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -38,9 +46,15 @@ class GroupSerializer(serializers.ModelSerializer):
     - Slug группы;
     - Описании группы.
     """
+
     class Meta:
         model = Group
-        fields = ('id', 'title', 'slug', 'description')
+        fields = (
+            'id',
+            'title',
+            'slug',
+            'description'
+        )
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -56,6 +70,7 @@ class CommentSerializer(serializers.ModelSerializer):
     Примечания:
     1) Поле `post` доступно только для чтения.
     """
+
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username'
@@ -63,18 +78,28 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'author', 'post', 'text', 'created')
+        fields = (
+            'id',
+            'author',
+            'post',
+            'text',
+            'created'
+        )
         read_only_fields = ('post',)
 
 
 class FollowSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для модели Follow (подписки пользователей).
+    Сериализатор для модели Follow
+    (подписки пользователей).
 
     Notes:
-        1) 'user' заполняется автоматически текущим пользователем при создании.
-        2) Используется `SlugRelatedField` для отображения username вместо ID.
+        1) 'user' заполняется автоматически
+    текущим пользователем при создании.
+        2) Используется `SlugRelatedField`
+    для отображения username вместо ID.
     """
+
     user = serializers.SlugRelatedField(
         slug_field='username',
         queryset=User.objects.all(),
@@ -96,6 +121,10 @@ class FollowSerializer(serializers.ModelSerializer):
         ]
 
     def validate_following(self, data):
+        """
+        Проверяет, что пользователь
+        не пытается подписаться на себя.
+        """
         if data == self.context['request'].user:
             raise serializers.ValidationError(
                 'Нельзя подписаться на самого себя'
